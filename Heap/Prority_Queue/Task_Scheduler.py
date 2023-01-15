@@ -32,25 +32,26 @@ Explanation:
 One possible solution is
 A -> B -> C -> A -> D -> E -> A -> F -> G -> A -> idle -> idle -> A -> idle -> idle -> A
 
+TC = O(N)
+
 """
+
 
 class Solution:
     def leastInterval(self, tasks: List[str], n: int) -> int:
-        counter = dict()
-        for task in tasks:
-            counter[task] = counter.get(task, 0) + 1
-        
-        hq = list()
-        for task, count in counter.items():
-            heappush(hq, (-count, task))
-        
+        count = Counter(tasks)
+        maxHeap = [ -cnt for cnt in count.values()]
+        heapq.heapify(maxHeap)
+
+        q = deque()
         time = 0
-        while hq:
-            tmp = []
-            for _ in range(n+1):
-                if hq: tmp.append((heappop(hq)))
-            for count, task in tmp:
-                if count+1 < 0: heappush(hq, (count+1, task))
-            time += len(tmp) if not hq else n+1
-                
+        while maxHeap or q:
+            time += 1 
+            if maxHeap:
+                cnt = 1 + heapq.heappop(maxHeap)
+                if cnt:
+                    q.append([cnt,time+n])
+            if q and q[0][1] == time:
+                heapq.heappush(maxHeap, q.popleft()[0])
         return time
+
